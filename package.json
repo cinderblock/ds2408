@@ -1,0 +1,23 @@
+{
+  "name": "library",
+  "version": "0.0.0",
+  "description": "Library for ...",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/index.js",
+    "dist/index.d.ts"
+  ],
+  "author": "Cameron Tacklind <cameron@tacklind.com> (https://cameron.tacklind.com)",
+  "license": "MIT",
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^12.0.2",
+    "prettier": "^1.16.4",
+    "tslint": "^5.14.0",
+    "typescript": "^3.4.5"
+  }
+}
