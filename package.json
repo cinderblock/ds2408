@@ -1,12 +1,12 @@
 {
-  "name": "library",
+  "name": "ds2408",
   "version": "0.0.0",
-  "description": "Library for ...",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "description": "Library for reading/writing from/to ds2408 chips via Linux's SysFS interface",
+  "main": "dist/ds2408.js",
+  "types": "dist/ds2408.d.ts",
   "files": [
-    "dist/index.js",
-    "dist/index.d.ts"
+    "dist/ds2408.js",
+    "dist/ds2408.d.ts"
   ],
   "author": "Cameron Tacklind <cameron@tacklind.com> (https://cameron.tacklind.com)",
   "license": "MIT",

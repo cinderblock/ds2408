@@ -1,11 +1,11 @@
-# Library
+# ds2408
 
-Library for ..
+Library for reading/writing from/to ds2408 chips via Linux's SysFS interface
 
 # Usage
 
 ```bash
-npm install ...
+npm install ds2408
 // OR
-yarn add ...
+yarn add ds2408
 ```
