@@ -78,8 +78,7 @@ export default class DS2408 {
     };
   }
 
-  async setOutputs(byte: number | string) {
-    byte = Number(byte);
+  async setOutputs(byte: number) {
     if (byte < 0 || byte > 255)
       throw new RangeError('Output value must be in range [0,255]');
 
