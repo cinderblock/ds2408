@@ -9,7 +9,7 @@ export function onAttach(listener: (serial: string) => void) {
   };
 }
 
-export type ActivityListener = (byte: number) => void;
+export type ActivityListener = (activity: number, state: number) => void;
 
 const devicesDir = '/sys/bus/w1/devices';
 
@@ -191,7 +191,9 @@ conditional search.
       console.log('Error in clearActivity:', e)
     );
 
-    this.activityListeners.forEach(l => l(a));
+    const s = await this.readState();
+
+    this.activityListeners.forEach(l => l(a, s));
   }
 
   onActivity(listener: ActivityListener) {
