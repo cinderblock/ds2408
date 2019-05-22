@@ -28,6 +28,7 @@ function setBit(x: number, bit: number, value: boolean | undefined) {
 
 export default class DS2408 {
   readonly serial: string;
+  private outputs: number;
   private activityListeners: ActivityListener[];
 
   constructor(serial?: string, loopDelay = 100) {
@@ -41,6 +42,9 @@ export default class DS2408 {
 
     this.serial = serial;
     this.activityListeners = [];
+
+    this.outputs = 255;
+    this.readOutput();
 
     const activityLoop = async () => {
       try {
@@ -128,7 +132,11 @@ export default class DS2408 {
    * Current Output values
    */
   async readOutput() {
-    return this.readDeviceFile('output');
+    const ret = this.readDeviceFile('output');
+
+    ret.then(v => (this.outputs = v));
+
+    return ret;
   }
 
   async setControl(value: number) {
@@ -206,10 +214,35 @@ conditional search.
     };
   }
 
-  async setOutputs(byte: number) {
+  /**
+   * Set the entire byte of output values
+   * @param byte Raw value to write to outputs
+   */
+  async setOutput(byte: number) {
     if (byte < 0 || byte > 255)
       throw new RangeError('Output value must be in range [0,255]');
 
-    return this.writeDeviceFile('output', byte);
+    const ret = this.writeDeviceFile('output', byte);
+
+    ret.then(() => (this.outputs = byte));
+
+    return ret;
+  }
+
+  /**
+   * Modify outputs of select bits based on cached state.
+   * Bits in `mask` set to `1` will be cleared on device
+   * @param mask Outputs to sink to ground (Inverted)
+   */
+  async sinkOutputs(mask: number) {
+    this.setOutput(this.outputs & ~mask);
+  }
+
+  /**
+   * Modify outputs of select bits based on cached state
+   * @param mask Bits to set in output byte
+   */
+  async floatOutputs(mask: number) {
+    this.setOutput(this.outputs | mask);
   }
 }
