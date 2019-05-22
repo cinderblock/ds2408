@@ -119,21 +119,21 @@ export default class DS2408 {
   /**
    * The current state of the IO pins of the device
    */
-  async readState() {
+  readState() {
     return this.readDeviceFile('state');
   }
 
   /**
    * Current status_control byte
    */
-  async readControl() {
+  readControl() {
     return this.readDeviceFile('status_control');
   }
 
   /**
    * Current Output values
    */
-  async readOutput() {
+  readOutput() {
     const ret = this.readDeviceFile('output');
 
     ret.then(v => (this.outputs = v));
@@ -141,7 +141,7 @@ export default class DS2408 {
     return ret;
   }
 
-  async setControl(value: number) {
+  setControl(value: number) {
     return this.writeDeviceFile('status_control', value);
   }
 
@@ -187,7 +187,7 @@ conditional search.
     return this.writeDeviceFile('activity');
   }
 
-  private async readActivity() {
+  private readActivity() {
     return this.readDeviceFile('activity');
   }
 
@@ -227,7 +227,7 @@ conditional search.
    * Set the entire byte of output values
    * @param byte Raw value to write to outputs
    */
-  async setOutput(byte: number) {
+  setOutput(byte: number) {
     if (byte < 0 || byte > 255)
       throw new RangeError('Output value must be in range [0,255]');
 
@@ -243,7 +243,7 @@ conditional search.
    * Bits in `mask` set to `1` will be cleared on device
    * @param mask Outputs to sink to ground (Inverted)
    */
-  async sinkOutputs(mask: number) {
+  sinkOutputs(mask: number) {
     return this.setOutput(this.outputs & ~mask);
   }
 
@@ -251,7 +251,7 @@ conditional search.
    * Modify outputs of select bits based on cached state
    * @param mask Bits to set in output byte
    */
-  async floatOutputs(mask: number) {
+  floatOutputs(mask: number) {
     return this.setOutput(this.outputs | mask);
   }
 }
