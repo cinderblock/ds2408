@@ -254,4 +254,13 @@ conditional search.
   floatOutputs(mask: number) {
     return this.setOutput(this.outputs | mask);
   }
+
+  /**
+   * Modify a group of outputs together
+   * @param mask Mask of bits to modify
+   * @param value New values for masked bits
+   */
+  maskedSetOutputs(mask: number, value: number) {
+    return this.setOutput((this.outputs & ~mask) | (value & mask));
+  }
 }
