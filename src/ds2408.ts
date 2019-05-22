@@ -28,10 +28,11 @@ function setBit(x: number, bit: number, value: boolean | undefined) {
 
 export default class DS2408 {
   readonly serial: string;
+  private verificationLoops: number;
   private outputs: number;
   private activityListeners: ActivityListener[];
 
-  constructor(serial?: string, loopDelay = 100) {
+  constructor(serial?: string, loopDelay = 100, verificationLoops = 2) {
     if (!serial) {
       serial = readdirSync(devicesDir).find(s => s.startsWith('29-'));
       if (!serial) throw new Error('Did not find any attached DS2408 devices');
@@ -41,6 +42,7 @@ export default class DS2408 {
     }
 
     this.serial = serial;
+    this.verificationLoops = verificationLoops;
     this.activityListeners = [];
 
     this.outputs = 255;
@@ -93,7 +95,7 @@ export default class DS2408 {
         matches = 0;
         last = next;
       }
-    } while (matches < 5);
+    } while (matches < this.verificationLoops);
 
     return last;
   }
@@ -189,6 +191,9 @@ conditional search.
     return this.readDeviceFile('activity');
   }
 
+  /**
+   * Check the activity byte of the remote device and notify.
+   */
   async updateActivity() {
     const a = await this.readActivity().catch(e =>
       console.log('Error in readActivity:', e)
@@ -204,6 +209,10 @@ conditional search.
     this.activityListeners.forEach(l => l(a, s));
   }
 
+  /**
+   * Listen for GPIO state changes on remote device
+   * @param listener Function to call on activity
+   */
   onActivity(listener: ActivityListener) {
     this.activityListeners.push(listener);
 
