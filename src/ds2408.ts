@@ -244,7 +244,7 @@ conditional search.
    * @param mask Outputs to sink to ground (Inverted)
    */
   async sinkOutputs(mask: number) {
-    this.setOutput(this.outputs & ~mask);
+    return this.setOutput(this.outputs & ~mask);
   }
 
   /**
@@ -252,6 +252,6 @@ conditional search.
    * @param mask Bits to set in output byte
    */
   async floatOutputs(mask: number) {
-    this.setOutput(this.outputs | mask);
+    return this.setOutput(this.outputs | mask);
   }
 }
