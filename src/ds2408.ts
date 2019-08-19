@@ -95,7 +95,7 @@ export default class DS2408 {
         matches = 0;
         last = next;
       }
-    } while (matches < this.verificationLoops);
+    } while (matches! < this.verificationLoops);
 
     return last;
   }
