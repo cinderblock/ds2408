@@ -53,7 +53,9 @@ export default class DS2408 {
         await this.updateActivity();
         setTimeout(activityLoop, loopDelay);
       } catch (e) {
-        console.log('Error!', e);
+        console.log('Error reading activity!');
+        console.log(e);
+        console.log('Update loop stopped');
       }
     };
 
