@@ -26,13 +26,24 @@ function setBit(x: number, bit: number, value: boolean | undefined) {
   return x & ~bit;
 }
 
+export type Options = {
+  loopDelay: number;
+  verificationLoops: number;
+};
+
 export default class DS2408 {
   readonly serial: string;
   private verificationLoops: number;
   private outputs: number;
   private activityListeners: ActivityListener[];
 
-  constructor(serial?: string, loopDelay = 100, verificationLoops = 2) {
+  constructor(serial?: string, loopDelay?: number, verificationLoops?: number);
+  constructor(serial?: string, loopDelay?: Options);
+  constructor(
+    serial?: string,
+    loopDelay: number | Options = 100,
+    verificationLoops = 2,
+  ) {
     if (!serial) {
       serial = readdirSync(devicesDir).find(s => s.startsWith('29-'));
       if (!serial) throw new Error('Did not find any attached DS2408 devices');
@@ -42,16 +53,23 @@ export default class DS2408 {
     }
 
     this.serial = serial;
+
+    if (typeof loopDelay == 'object') {
+      verificationLoops = loopDelay.verificationLoops;
+      loopDelay = loopDelay.loopDelay;
+    }
+
     this.verificationLoops = verificationLoops;
     this.activityListeners = [];
 
     this.outputs = 255;
     this.readOutput();
 
+    // Constantly check the `activity` register
     const activityLoop = async () => {
       try {
         await this.updateActivity();
-        setTimeout(activityLoop, loopDelay);
+        setTimeout(activityLoop, loopDelay as number);
       } catch (e) {
         console.log('Error reading activity!');
         console.log(e);
