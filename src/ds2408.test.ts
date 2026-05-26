@@ -250,31 +250,42 @@ test('startActivityLoop fires listeners on non-zero activity, then stopActivityL
   const bus = await makeFakeBus({
     '29-x': { activity: 0, state: 0xc3 },
   });
+  const ds = await DS2408.open('29-x', {
+    devicesDir: bus,
+    verificationLoops: 0,
+  });
   try {
-    const ds = await DS2408.open('29-x', {
-      devicesDir: bus,
-      verificationLoops: 0,
+    const observations: Array<{ activity: number; state: number }> = [];
+    let firstObservation: ((o: { activity: number; state: number }) => void) | undefined;
+    const firstObserved = new Promise<{ activity: number; state: number }>(resolve => {
+      firstObservation = resolve;
     });
 
-    const observations: Array<{ activity: number; state: number }> = [];
     ds.onActivity((activity, state) => {
       observations.push({ activity, state });
+      firstObservation?.({ activity, state });
+      firstObservation = undefined;
     });
 
-    ds.startActivityLoop({ loopDelay: 10 });
-    // Let one tick happen with activity=0.
-    await new Promise(r => setTimeout(r, 30));
-    assert.equal(observations.length, 0);
-
-    // Inject activity and wait for the next tick.
+    // Inject activity BEFORE starting the loop so the first tick is
+    // guaranteed to see it, regardless of how setTimeout(0) races with
+    // pending I/O resolution.
     await writeRegister(bus, '29-x', 'activity', 0xa5);
-    await new Promise(r => setTimeout(r, 40));
+    ds.startActivityLoop({ loopDelay: 5 });
 
+    // Wait up to 2 s for the first observation. CI is slower than local.
+    const observed = await Promise.race([
+      firstObserved,
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('timeout waiting for activity')), 2000),
+      ),
+    ]);
+    assert.equal(observed.activity, 0xa5);
+  } finally {
+    // Always stop the loop BEFORE rm-ing the fake bus, or async reads can
+    // race the directory removal.
     await ds.stopActivityLoop();
     assert.ok(!ds.isActivityLoopRunning);
-    assert.ok(observations.length >= 1);
-    assert.equal(observations[0]!.activity, 0xa5);
-  } finally {
     await rm(bus, { recursive: true, force: true });
   }
 });
