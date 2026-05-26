@@ -1,0 +1,30 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+      # npm Trusted Publishing needs npm CLI 11.5.1+. Node 22 ships with 10.x.
+      # Also: do NOT pass registry-url to setup-node — it writes an .npmrc that
+      # configures a placeholder authToken, which blocks npm's OIDC exchange.
+      - run: npm install -g npm@latest
+      - run: npm ci
+      - run: npm test
+      # Auth is via npm Trusted Publishing (OIDC). Configure on npmjs.com:
+      # https://www.npmjs.com/package/ds2408/access → "Trusted Publisher" → add
+      # GitHub Actions / cinderblock / ds2408 / publish.yml / (no environment).
+      - run: npm publish --provenance --access public
